@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Big Screen Timer</title>
+  <rect width="128" height="128" rx="28" fill="#0f172a"/>
+  <circle cx="64" cy="64" r="40" fill="#1f6fff"/>
+  <circle cx="64" cy="64" r="30" fill="#0f172a"/>
+  <path d="M64 42v24l18 10" fill="none" stroke="#facc15" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+</svg>

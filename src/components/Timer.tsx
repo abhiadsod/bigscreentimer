@@ -5,7 +5,6 @@ import { PresetButtons } from "./PresetButtons";
 import { CustomTimeInput } from "./CustomTimeInput";
 import { ModeToggle } from "./ModeToggle";
 import { LapTimes } from "./LapTimes";
-import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Flag } from "lucide-react";
 import { playNotificationSound } from "@/lib/timeUtils";
@@ -123,88 +122,75 @@ export function Timer() {
   }, [isRunning, handleStart, handlePause, handleReset, handleLap, mode]);
 
   return (
-    <div className="min-h-screen bg-background theme-transition">
-      <ThemeToggle />
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Big Screen Timer
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Distraction-free timer and stopwatch for productivity
-          </p>
-        </div>
+    <section className="mx-auto max-w-4xl px-4 py-4 md:px-6">
+      <div className="timer-card max-w-3xl mx-auto">
+        <ModeToggle 
+          mode={mode} 
+          onModeChange={handleModeChange} 
+          disabled={isRunning}
+        />
 
-        <div className="timer-card max-w-2xl mx-auto">
-          <ModeToggle 
-            mode={mode} 
-            onModeChange={handleModeChange} 
-            disabled={isRunning}
-          />
+        <TimerDisplay 
+          time={time} 
+          isRunning={isRunning} 
+          mode={mode}
+        />
 
-          <TimerDisplay 
-            time={time} 
-            isRunning={isRunning} 
-            mode={mode}
-          />
+        <TimerControls 
+          isRunning={isRunning}
+          onStart={handleStart}
+          onPause={handlePause}
+          onReset={handleReset}
+          disabled={mode === "timer" && time === 0 && !isRunning}
+        />
 
-          <TimerControls 
-            isRunning={isRunning}
-            onStart={handleStart}
-            onPause={handlePause}
-            onReset={handleReset}
-            disabled={mode === "timer" && time === 0 && !isRunning}
-          />
-
-          {mode === "stopwatch" && isRunning && (
-            <div className="flex justify-center mb-8">
-              <Button
-                onClick={handleLap}
-                variant="outline"
-                className="action-button-secondary"
-                size="lg"
-              >
-                <Flag className="mr-2 h-4 w-4" />
-                Lap
-              </Button>
-            </div>
-          )}
-
-          {mode === "timer" && !isRunning && (
-            <>
-              <PresetButtons 
-                onSelectPreset={handleSetTime}
-                disabled={isRunning}
-              />
-              <CustomTimeInput 
-                onSetTime={handleSetTime}
-                disabled={isRunning}
-              />
-            </>
-          )}
-
-          {mode === "stopwatch" && lapTimes.length > 0 && (
-            <LapTimes lapTimes={lapTimes} />
-          )}
-        </div>
-
-        <div className="text-center mt-12 text-muted-foreground">
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <span>
-              <kbd className="px-2 py-1 bg-muted rounded text-xs">Space</kbd> Start/Pause
-            </span>
-            <span>
-              <kbd className="px-2 py-1 bg-muted rounded text-xs">R</kbd> Reset
-            </span>
-            {mode === "stopwatch" && (
-              <span>
-                <kbd className="px-2 py-1 bg-muted rounded text-xs">L</kbd> Lap
-              </span>
-            )}
+        {mode === "stopwatch" && isRunning && (
+          <div className="flex justify-center mb-8">
+            <Button
+              onClick={handleLap}
+              variant="outline"
+              className="action-button-secondary"
+              size="lg"
+            >
+              <Flag className="mr-2 h-4 w-4" />
+              Lap
+            </Button>
           </div>
+        )}
+
+        {mode === "timer" && !isRunning && (
+          <>
+            <PresetButtons 
+              onSelectPreset={handleSetTime}
+              disabled={isRunning}
+            />
+            <CustomTimeInput 
+              onSetTime={handleSetTime}
+              disabled={isRunning}
+            />
+          </>
+        )}
+
+        {mode === "stopwatch" && lapTimes.length > 0 && (
+          <LapTimes lapTimes={lapTimes} />
+        )}
+      </div>
+
+      <div className="text-center mt-10 text-muted-foreground">
+        <div className="flex flex-wrap justify-center gap-4 text-sm">
+          <span>
+            <kbd className="px-2 py-1 bg-muted rounded text-xs">Space</kbd> Start/Pause
+          </span>
+          <span>
+            <kbd className="px-2 py-1 bg-muted rounded text-xs">R</kbd> Reset
+          </span>
+          {mode === "stopwatch" && (
+            <span>
+              <kbd className="px-2 py-1 bg-muted rounded text-xs">L</kbd> Lap
+            </span>
+          )}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
