@@ -10,10 +10,12 @@ import { Flag } from "lucide-react";
 import { playNotificationSound } from "@/lib/timeUtils";
 import { useToast } from "@/hooks/use-toast";
 
+const DEFAULT_TIMER_SECONDS = 10 * 60;
+
 export function Timer() {
   const [mode, setMode] = useState<"timer" | "stopwatch">("timer");
-  const [time, setTime] = useState(0);
-  const [initialTime, setInitialTime] = useState(0);
+  const [time, setTime] = useState(DEFAULT_TIMER_SECONDS);
+  const [initialTime, setInitialTime] = useState(DEFAULT_TIMER_SECONDS);
   const [isRunning, setIsRunning] = useState(false);
   const [lapTimes, setLapTimes] = useState<number[]>([]);
   const { toast } = useToast();
@@ -77,8 +79,8 @@ export function Timer() {
   const handleModeChange = useCallback((newMode: "timer" | "stopwatch") => {
     setIsRunning(false);
     setMode(newMode);
-    setTime(0);
-    setInitialTime(0);
+    setTime(newMode === "timer" ? DEFAULT_TIMER_SECONDS : 0);
+    setInitialTime(newMode === "timer" ? DEFAULT_TIMER_SECONDS : 0);
     setLapTimes([]);
   }, []);
 
