@@ -13,18 +13,18 @@ const Index = () => {
         path="/"
       />
 
-      <section className="mx-auto max-w-6xl px-4 py-14 md:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-6xl">
+          <h1 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl">
             Big Screen Timer
           </h1>
-          <p className="mt-5 text-lg leading-8 text-muted-foreground">
+          <p className="mt-4 text-base leading-7 text-muted-foreground md:text-lg">
             A free online timer and stopwatch built for shared screens, study
             sessions, presentations, classrooms, workouts, and focus work.
           </p>
         </div>
 
-        <div className="mt-12">
+        <div className="mt-8">
           <Timer />
         </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { TimerDisplay } from "./TimerDisplay";
 import { TimerControls } from "./TimerControls";
 import { PresetButtons } from "./PresetButtons";
@@ -11,13 +11,19 @@ import { playNotificationSound } from "@/lib/timeUtils";
 import { useToast } from "@/hooks/use-toast";
 
 const DEFAULT_TIMER_SECONDS = 10 * 60;
+const DEFAULT_TIMER_MS = DEFAULT_TIMER_SECONDS * 1000;
+const STOPWATCH_TICK_MS = 10;
 
 export function Timer() {
   const [mode, setMode] = useState<"timer" | "stopwatch">("timer");
-  const [time, setTime] = useState(DEFAULT_TIMER_SECONDS);
-  const [initialTime, setInitialTime] = useState(DEFAULT_TIMER_SECONDS);
+  const [time, setTime] = useState(DEFAULT_TIMER_MS);
+  const [initialTime, setInitialTime] = useState(DEFAULT_TIMER_MS);
   const [isRunning, setIsRunning] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const timerRootRef = useRef<HTMLElement>(null);
   const [lapTimes, setLapTimes] = useState<number[]>([]);
+  const stopwatchStartRef = useRef<number | null>(null);
+  const stopwatchElapsedRef = useRef(0);
   const { toast } = useToast();
 
   // Timer countdown logic
@@ -25,10 +31,19 @@ export function Timer() {
     let interval: NodeJS.Timeout;
 
     if (isRunning) {
-      interval = setInterval(() => {
-        setTime((prevTime) => {
-          if (mode === "timer") {
-            if (prevTime <= 1) {
+      if (mode === "stopwatch") {
+        if (stopwatchStartRef.current === null) {
+          stopwatchStartRef.current = Date.now();
+        }
+
+        interval = setInterval(() => {
+          const elapsed = stopwatchElapsedRef.current + (Date.now() - (stopwatchStartRef.current ?? Date.now()));
+          setTime(elapsed);
+        }, STOPWATCH_TICK_MS);
+      } else {
+        interval = setInterval(() => {
+          setTime((prevTime) => {
+            if (prevTime <= 1000) {
               setIsRunning(false);
               playNotificationSound();
               toast({
@@ -38,13 +53,10 @@ export function Timer() {
               });
               return 0;
             }
-            return prevTime - 1;
-          } else {
-            // Stopwatch mode
-            return prevTime + 1;
-          }
-        });
-      }, 1000);
+            return prevTime - 1000;
+          });
+        }, 1000);
+      }
     }
 
     return () => clearInterval(interval);
@@ -63,8 +75,13 @@ export function Timer() {
   }, [mode, time, toast]);
 
   const handlePause = useCallback(() => {
+    if (mode === "stopwatch" && isRunning && stopwatchStartRef.current !== null) {
+      stopwatchElapsedRef.current += Date.now() - stopwatchStartRef.current;
+      stopwatchStartRef.current = null;
+      setTime(stopwatchElapsedRef.current);
+    }
     setIsRunning(false);
-  }, []);
+  }, [isRunning, mode]);
 
   const handleReset = useCallback(() => {
     setIsRunning(false);
@@ -72,6 +89,8 @@ export function Timer() {
       setTime(initialTime);
     } else {
       setTime(0);
+      stopwatchElapsedRef.current = 0;
+      stopwatchStartRef.current = null;
       setLapTimes([]);
     }
   }, [mode, initialTime]);
@@ -79,23 +98,54 @@ export function Timer() {
   const handleModeChange = useCallback((newMode: "timer" | "stopwatch") => {
     setIsRunning(false);
     setMode(newMode);
-    setTime(newMode === "timer" ? DEFAULT_TIMER_SECONDS : 0);
-    setInitialTime(newMode === "timer" ? DEFAULT_TIMER_SECONDS : 0);
+    setTime(newMode === "timer" ? DEFAULT_TIMER_MS : 0);
+    setInitialTime(newMode === "timer" ? DEFAULT_TIMER_MS : 0);
+    stopwatchElapsedRef.current = 0;
+    stopwatchStartRef.current = null;
     setLapTimes([]);
   }, []);
 
   const handleSetTime = useCallback((seconds: number) => {
     if (!isRunning) {
-      setTime(seconds);
-      setInitialTime(seconds);
+      const nextTime = seconds * 1000;
+      setTime(nextTime);
+      setInitialTime(nextTime);
     }
   }, [isRunning]);
 
   const handleLap = useCallback(() => {
     if (mode === "stopwatch" && isRunning) {
-      setLapTimes((prev) => [time, ...prev]);
+      const currentElapsed = stopwatchElapsedRef.current + (stopwatchStartRef.current === null ? 0 : Date.now() - stopwatchStartRef.current);
+      setLapTimes((prev) => [currentElapsed, ...prev]);
     }
-  }, [mode, isRunning, time]);
+  }, [mode, isRunning]);
+
+  const handleToggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenEnabled) return;
+
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await timerRootRef.current?.requestFullscreen();
+      }
+    } catch {
+      toast({
+        title: "Fullscreen unavailable",
+        description: "Your browser could not switch this timer to fullscreen.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === timerRootRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -116,16 +166,22 @@ export function Timer() {
       } else if (event.code === "KeyL" && mode === "stopwatch" && isRunning) {
         event.preventDefault();
         handleLap();
+      } else if (event.code === "KeyF") {
+        event.preventDefault();
+        handleToggleFullscreen();
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isRunning, handleStart, handlePause, handleReset, handleLap, mode]);
+  }, [isRunning, handleStart, handlePause, handleReset, handleLap, handleToggleFullscreen, mode]);
 
   return (
-    <section className="mx-auto max-w-4xl px-4 py-4 md:px-6">
-      <div className="timer-card max-w-3xl mx-auto">
+    <section
+      ref={timerRootRef}
+      className="timer-fullscreen-root mx-auto max-w-6xl px-3 py-3 md:px-6"
+    >
+      <div className="timer-card mx-auto max-w-5xl">
         <ModeToggle 
           mode={mode} 
           onModeChange={handleModeChange} 
@@ -143,6 +199,9 @@ export function Timer() {
           onStart={handleStart}
           onPause={handlePause}
           onReset={handleReset}
+          onToggleFullscreen={handleToggleFullscreen}
+          isFullscreen={isFullscreen}
+          fullscreenSupported={document.fullscreenEnabled}
           disabled={mode === "timer" && time === 0 && !isRunning}
         />
 
@@ -191,6 +250,9 @@ export function Timer() {
               <kbd className="px-2 py-1 bg-muted rounded text-xs">L</kbd> Lap
             </span>
           )}
+          <span>
+            <kbd className="px-2 py-1 bg-muted rounded text-xs">F</kbd> Fullscreen
+          </span>
         </div>
       </div>
     </section>

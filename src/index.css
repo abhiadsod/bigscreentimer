@@ -170,20 +170,64 @@ All colors MUST be HSL.
 @layer components {
   /* Timer display components */
   .timer-display {
-    @apply text-6xl md:text-8xl lg:text-9xl font-bold tabular-nums;
+    @apply font-bold tabular-nums;
+    font-size: clamp(4.75rem, 15vw, 13rem);
+    line-height: 0.9;
     text-shadow: 0 2px 4px hsl(var(--foreground) / 0.1);
     transition: var(--transition-smooth);
   }
+
+  .timer-display-stopwatch {
+    font-size: clamp(4.25rem, 13vw, 11rem);
+  }
   
   .timer-card {
-    @apply bg-card border border-border rounded-[var(--radius)] p-8 md:p-12;
+    @apply bg-card border border-border rounded-[var(--radius)];
     background: var(--gradient-surface);
     box-shadow: var(--shadow-card);
+    padding: clamp(1.5rem, 4vw, 4rem);
     transition: var(--transition-smooth);
   }
   
   .timer-card:hover {
     box-shadow: var(--shadow-elevated);
+  }
+
+  .timer-controls {
+    @apply mb-8 flex flex-wrap items-center justify-center gap-3 md:gap-4;
+  }
+
+  .timer-fullscreen-root {
+    background: hsl(var(--background));
+  }
+
+  .timer-fullscreen-root:fullscreen {
+    @apply flex min-h-screen items-center justify-center;
+    padding: clamp(1rem, 3vw, 3rem);
+  }
+
+  .timer-fullscreen-root:fullscreen .timer-card {
+    @apply flex w-full max-w-none flex-col justify-center border-0;
+    min-height: calc(100vh - clamp(2rem, 6vw, 6rem));
+    box-shadow: none;
+  }
+
+  .timer-fullscreen-root:fullscreen .timer-display {
+    font-size: clamp(6rem, 24vw, 24rem);
+    text-shadow: 0 6px 24px hsl(var(--foreground) / 0.12);
+  }
+
+  .timer-fullscreen-root:fullscreen .timer-display-stopwatch {
+    font-size: clamp(5.5rem, 20vw, 21rem);
+  }
+
+  .timer-fullscreen-root:fullscreen .timer-controls {
+    @apply gap-4 md:gap-5;
+  }
+
+  .timer-fullscreen-root:fullscreen .action-button-primary,
+  .timer-fullscreen-root:fullscreen .action-button-secondary {
+    @apply min-h-14 px-8 text-lg md:min-h-16 md:px-10 md:text-xl;
   }
   
   /* Preset button styling */

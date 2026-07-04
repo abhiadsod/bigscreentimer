@@ -1,4 +1,4 @@
-import { Play, Pause, Square, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TimerControlsProps {
@@ -6,17 +6,29 @@ interface TimerControlsProps {
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
+  onToggleFullscreen: () => void;
+  isFullscreen: boolean;
+  fullscreenSupported: boolean;
   disabled?: boolean;
 }
 
-export function TimerControls({ isRunning, onStart, onPause, onReset, disabled = false }: TimerControlsProps) {
+export function TimerControls({
+  isRunning,
+  onStart,
+  onPause,
+  onReset,
+  onToggleFullscreen,
+  isFullscreen,
+  fullscreenSupported,
+  disabled = false,
+}: TimerControlsProps) {
   return (
-    <div className="flex justify-center items-center gap-4 mb-8">
+    <div className="timer-controls">
       {!isRunning ? (
         <Button
           onClick={onStart}
           disabled={disabled}
-          className="action-button-primary min-w-[120px]"
+          className="action-button-primary min-w-[136px]"
           size="lg"
         >
           <Play className="mr-2 h-5 w-5" />
@@ -25,7 +37,7 @@ export function TimerControls({ isRunning, onStart, onPause, onReset, disabled =
       ) : (
         <Button
           onClick={onPause}
-          className="action-button-primary min-w-[120px]"
+          className="action-button-primary min-w-[136px]"
           size="lg"
         >
           <Pause className="mr-2 h-5 w-5" />
@@ -41,6 +53,22 @@ export function TimerControls({ isRunning, onStart, onPause, onReset, disabled =
       >
         <RotateCcw className="mr-2 h-4 w-4" />
         Reset
+      </Button>
+
+      <Button
+        onClick={onToggleFullscreen}
+        variant="outline"
+        className="action-button-secondary"
+        size="lg"
+        disabled={!fullscreenSupported}
+        aria-pressed={isFullscreen}
+      >
+        {isFullscreen ? (
+          <Minimize2 className="mr-2 h-4 w-4" />
+        ) : (
+          <Maximize2 className="mr-2 h-4 w-4" />
+        )}
+        {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
       </Button>
     </div>
   );

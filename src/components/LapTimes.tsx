@@ -1,4 +1,4 @@
-import { formatTime } from "@/lib/timeUtils";
+import { formatStopwatchTime } from "@/lib/timeUtils";
 import { Badge } from "@/components/ui/badge";
 
 interface LapTimesProps {
@@ -19,6 +19,7 @@ export function LapTimes({ lapTimes }: LapTimesProps) {
         <div className="space-y-2">
           {lapTimes.map((lapTime, index) => {
             const lapNumber = lapTimes.length - index;
+            const displayTime = formatStopwatchTime(lapTime);
             return (
               <div
                 key={index}
@@ -28,7 +29,7 @@ export function LapTimes({ lapTimes }: LapTimesProps) {
                   Lap {lapNumber}
                 </Badge>
                 <span className="font-mono text-lg font-medium">
-                  {formatTime(lapTime)}
+                  {displayTime}
                 </span>
               </div>
             );

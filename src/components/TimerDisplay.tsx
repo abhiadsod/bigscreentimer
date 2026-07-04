@@ -1,4 +1,4 @@
-import { formatTime } from "@/lib/timeUtils";
+import { formatStopwatchTime, formatTime } from "@/lib/timeUtils";
 
 interface TimerDisplayProps {
   time: number;
@@ -7,15 +7,17 @@ interface TimerDisplayProps {
 }
 
 export function TimerDisplay({ time, isRunning, mode }: TimerDisplayProps) {
+  const displayTime = mode === "stopwatch" ? formatStopwatchTime(time) : formatTime(time);
+
   return (
     <div className="text-center mb-8">
       <div 
-        className={`timer-display ${isRunning ? 'text-primary' : 'text-foreground'} transition-colors duration-300`}
+        className={`timer-display ${mode === "stopwatch" ? "timer-display-stopwatch" : ""} ${isRunning ? 'text-primary' : 'text-foreground'} transition-colors duration-300`}
         role="timer"
         aria-live="polite"
-        aria-label={`${mode === 'timer' ? 'Timer' : 'Stopwatch'}: ${formatTime(time)}`}
+        aria-label={`${mode === 'timer' ? 'Timer' : 'Stopwatch'}: ${displayTime}`}
       >
-        {formatTime(time)}
+        {displayTime}
       </div>
       <div className="text-muted-foreground text-lg md:text-xl mt-2 font-medium">
         {mode === "timer" ? "Timer" : "Stopwatch"}

@@ -1,16 +1,35 @@
 /**
- * Format time in seconds to MM:SS or HH:MM:SS format
+ * Format countdown time in milliseconds to MM:SS or HH:MM:SS format.
  */
-export function formatTime(timeInSeconds: number): string {
-  const hours = Math.floor(timeInSeconds / 3600);
-  const minutes = Math.floor((timeInSeconds % 3600) / 60);
-  const seconds = timeInSeconds % 60;
+export function formatTime(timeInMilliseconds: number, forceHours = false): string {
+  const totalSeconds = Math.floor(timeInMilliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
 
-  if (hours > 0) {
+  if (forceHours || hours > 0) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
   
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Format stopwatch time in milliseconds to MM:SS.CC or HH:MM:SS.CC format.
+ */
+export function formatStopwatchTime(timeInMilliseconds: number): string {
+  const totalCentiseconds = Math.floor(timeInMilliseconds / 10);
+  const hours = Math.floor(totalCentiseconds / 360000);
+  const minutes = Math.floor((totalCentiseconds % 360000) / 6000);
+  const seconds = Math.floor((totalCentiseconds % 6000) / 100);
+  const centiseconds = totalCentiseconds % 100;
+  const fractional = centiseconds.toString().padStart(2, '0');
+
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${fractional}`;
+  }
+
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${fractional}`;
 }
 
 /**
